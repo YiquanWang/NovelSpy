@@ -1,3 +1,4 @@
+Ôªøusing System;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Threading;
@@ -8,6 +9,7 @@ using NovelSpy.tool;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -31,11 +33,9 @@ namespace NovelSpy.ViewModel
         public MainViewModel()
         {
         }
-        #region  Ù–‘
+        #region Â±ûÊÄß
 
-        private string path = "https://www.biquge.info/22_22522";
-        private ObservableCollection<Catalog> list;
-
+        private string path;
         public string Path
         {
             get
@@ -49,9 +49,18 @@ namespace NovelSpy.ViewModel
             }
         }
 
+        private string _status;
+        public string Status
+        {
+            get { return _status; }
+            set
+            {
+                _status = value;
+                RaisePropertyChanged(Status);
+            }
+        }
 
-        public string Status { get; set; }
-
+        private ObservableCollection<Catalog> list;
         public ObservableCollection<Catalog> List
         {
             get { return list; }
@@ -64,7 +73,7 @@ namespace NovelSpy.ViewModel
 
         #endregion
 
-        #region √¸¡Ó
+        #region ÂëΩ‰ª§
 
         public RelayCommand SpyCommand
         {
@@ -72,38 +81,15 @@ namespace NovelSpy.ViewModel
             {
                 return new RelayCommand(() =>
                 {
-                    HtmlWeb webClient = new HtmlWeb();
-                    HtmlDocument doc = webClient.Load(path);
-
-                    HtmlNodeCollection hrefList = doc.DocumentNode.SelectNodes(".//a[@href]");
-                    List = new ObservableCollection<Catalog>();
-                    if (hrefList != null)
+                    Task.Factory.StartNew(() =>
                     {
-                        foreach (HtmlNode href in hrefList)
-                        {
-                            string url = href.Attributes["href"].Value ?? "";
-                            if (url.StartsWith("#") || url.StartsWith("/") || url.ToLower().StartsWith("javascript:"))
-                            {
-                                continue;
-                            }
+                        Status = "ÂºÄÂßãËØªÂèñÁ´†ËäÇ„ÄÇ";
 
+                        List = new ObservableCollection<Catalog>(Factory.GetCatalog(path, 0));
 
-                            if (!url.StartsWith("http"))
-                            {
-                                url = path + "/" + url;
-                            }
+                        Status = "Âä†ËΩΩÁ´†ËäÇÂÆåÊàêÔºåÂä†ËΩΩÊó∂Èó¥Ôºö" + DateTime.Now.ToString("yyyy-M-d HH:mm:ss");
 
-                            if (!url.StartsWith(path))
-                            {
-                                continue;
-                            }
-
-                            Catalog clog = new Catalog();
-                            clog.Title = href.InnerText;
-                            clog.Url = url;
-                            List.Add(clog);
-                        }
-                    }
+                    });
                 });
             }
         }
@@ -148,7 +134,7 @@ namespace NovelSpy.ViewModel
                     if (List == null) return;
                     foreach (var item in List)
                     {
-                        item.Checked = item.Title.Contains("’¬");
+                        item.Checked = item.Title.Contains("Á´†");
                     }
                 });
             }
@@ -169,7 +155,7 @@ namespace NovelSpy.ViewModel
                     }
 
 
-                    var saveFileDialog = new SaveFileDialog { Filter = "¥øŒƒ±æŒƒº˛(*.txt)|*.txt" };
+                    var saveFileDialog = new SaveFileDialog { Filter = "Á∫ØÊñáÊú¨Êñá‰ª∂(*.txt)|*.txt" };
                     string filePath = "";
                     if (saveFileDialog.ShowDialog().GetValueOrDefault())
                     {
@@ -188,32 +174,29 @@ namespace NovelSpy.ViewModel
                             if (article != null)
                             {
                                 articles.Add(article);
-                                Status = "’˝‘⁄∂¡»°£∫" + article.Title;
-                                RaisePropertyChanged(() => Status);
+                                Status = "Ê≠£Âú®ËØªÂèñÔºö" + article.Title;
 
                             }
                         }
-                        
-                        Status = "∂¡»°ÕÍ≥…°£";
-                        RaisePropertyChanged(() => Status);
+
+                        Status = "ËØªÂèñÂÆåÊàê„ÄÇ";
 
 
                         foreach (var data in articles)
                         {
-                            Status = "’˝‘⁄–¥»Î£∫" + data.Title;
-                            RaisePropertyChanged(() => Status);
+                            Status = "Ê≠£Âú®ÂÜôÂÖ•Ôºö" + data.Title;
 
                             Factory.WriteToDocument(data.FullTxt, filePath);
                         }
-                        
-                        Status = "";
-                        RaisePropertyChanged(() => Status);
 
-                        MessageBox.Show("…˙≥…ÕÍ±œ°£");
+                        Status = "";
+
+                        MessageBox.Show("ÁîüÊàêÂÆåÊØï„ÄÇ");
                     });
                 });
             }
         }
         #endregion
+
     }
 }

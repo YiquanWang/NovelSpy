@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NovelSpy"
         mc:Ignorable="d" Background="#efefef"
-        Title="MainWindow" Height="600" Width="1000"
+        Title="小说采集工具" Height="600" Width="1000"
         DataContext="{Binding Main,Source={StaticResource Locator}}">
     <Window.Resources>
         <Style x:Key="List-Catolog" TargetType="{x:Type ItemsControl}">
@@ -33,7 +33,11 @@
 
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="目标网址："></TextBlock>
-                <TextBox Width="250" Text="{Binding Path}"></TextBox>
+                <TextBox Width="400" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding SpyCommand}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
                 <Button Content="获取章节" Command="{Binding SpyCommand}"/>
             </StackPanel>
         </Border>
